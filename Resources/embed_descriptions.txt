@@ -1,0 +1,9 @@
+Work in progreso de <@715394802752946199> y <@692172886168961045>.
+
+TLDR: Papanatas juega a ser assistant. Escribe `natas` seguido de una frase con relación a un comando de Papanatas.
+
+Sí, es una forma ineficiente de interactuar con bots de discord. Pero nadie dijo que discord fuera fácil de usar en primer lugar. Esta feature aún está incompleta, así que el comportamiento puede no ser acertado. Si encuentras un bug, te jodes. No aceptamos retroalimentación. Yo sé que ya sabes eso, porque leíste los __Términos De Uso__, pero nomás lo menciono por los demás.
+
+Cabe mencionar que esta feature marcará la release `5.0.0` de su servilleta.~
+
+A continuación te muestro ejemplos de equivalentes de comandos en lenguaje natural. Para que te sientas especial, te voy a responder con un embed azul cuando me hables al natural. <:marie:763874595580805130>

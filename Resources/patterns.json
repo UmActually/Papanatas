@@ -1,0 +1,125 @@
+{
+  "info": [
+    [
+      "necesito ayuda chingada madre no te entiendo",
+      "qp con tus comandos"
+    ],
+    [
+      {"LEMMA": {"IN": ["necesitar", "ocupar", "ocupo", "buscar"]}},
+      {"POS": "DET", "OP": "?"},
+      {"LEMMA": {"IN": ["ayuda", "info", "informaci\u00f3n"]}}, "!"
+    ],
+    [
+      {"_": {"less": "que"}, "OP": "?"},
+      {"_": {"less": {"IN": ["qp", "qpd", "qpdo", "pedo", "onda", "rollo", "tranza"]}}},
+      {"POS": "ADP", "OP": "?"},
+      {"POS": {"IN": ["DET", "PRON"]}}
+    ]
+  ],
+  "time": [
+    [
+      "me puedes decir la hora",
+      "serías tan amable de decirme qué día es hoy"
+    ],
+    [
+      {"LEMMA": {"IN": ["dar", "decir", "dimir", "dame"]}},
+      {"POS": "DET", "OP": "?"},
+      {"LEMMA": {"IN": ["hora", "tiempo", "fecha", "día", "dia"]}}
+    ],
+    [
+      {"_": {"less": "que"}},
+      {"LEMMA": {"IN": ["hora", "tiempo", "fecha", "día", "dia"]}}, "!",
+      {"LEMMA": {"IN": ["ser", "tener"]}}
+    ]
+  ],
+  "coords": [
+    [
+      "-345 44 2461 a nether",
+      "convierte las coords -663, 9, 130"
+    ],
+    [
+      {"LEMMA": {"IN": ["traducir", "convertir"]}, "OP":  "?"},
+      {"POS": "DET", "OP": "?"},
+      {"_": {"less": {"REGEX": "coo?rd(enada)?s?"}}, "OP": "?"}, "!",
+      "xyz {",
+        {"LIKE_NUM": true},
+        {"IS_PUNCT": true, "OP": "?"},
+        {"LIKE_NUM": true},
+        {"IS_PUNCT": true, "OP": "?"},
+        {"LIKE_NUM": true, "OP": "?"},
+      "}",
+      {"_": {"less": {"REGEX": "^al?$"}}, "OP": "?"},
+      {"_": {"less": {"REGEX": "ne(t|th|d|dh)er"}}}
+    ]
+  ],
+  "uno": [
+    [
+      "un unito o q",
+      "nueva partida de uno"
+    ],
+    [
+      {"LEMMA": "nuevo"},
+      {"_": {"less": {"REGEX": "(jue?g(o|ar)|partida)"}}},
+      {"POS": {"IN": ["ADP", "DET"]}, "OP": "?"},
+      {"_": {"less": {"REGEX": "^un(it)?o$"}}}, "!"
+    ]
+  ],
+  "salt": [
+    [
+      "puedes borrar esto en 5 segundos: ME GUSTA LEAGUE",
+      "destruye este mensaje en 10 s Chinguen todos a su madre"
+    ],
+    [
+      {"LEMMA": {"IN": ["borrar", "quitar", "destruir", "autodestruir"]}}, "!",
+      {"POS": {"IN": ["DET", "PRON"]}},
+      {"POS": {"IN": ["NOUN", "PROPN"]}, "OP": "?"},
+      {"POS": {"IN": ["ADP", "DET"]}, "OP":  "?"},
+      "seconds {",
+        {"LIKE_NUM": true},
+      "}",
+      {"_": {"less": {"REGEX": "^s(egundos)?\\W?$"}}},
+      "text {"
+    ]
+  ],
+  "jn": [
+    [
+      "caele al voice"
+    ],
+    [
+      {"_": {"less": {"REGEX": "cae(le)?"}}}, "!",
+      {"POS": "ADP"},
+      {"POS": "NOUN", "OP": "?"},
+      {"POS": "ADP", "OP": "?"},
+      {"_": {"less": {"REGEX": "v(c|oz|ox|oice)"}}}
+    ]
+  ],
+  "lv": [
+    [
+      "quítate de mi vista"
+    ],
+    [
+      {"_": {"less": {"IN": ["vete", "quitate"]}}}
+    ]
+  ],
+  "play": [
+    [
+      "pon a fleetwood mac",
+      "que suene la de real slim shady"
+    ],
+    [
+      {"LEMMA": {"IN": ["poner", "reproducir", "sonar", "pon", "oír", "oir", "escuchar", "pontir"]}}, "!",
+      {"POS": "DET", "OP": "?"},
+      {"POS": "ADP", "OP": "?"},
+      "query {"
+    ]
+  ],
+  "say": [
+    [
+      "dime lo que se siente ser un bot"
+    ],
+    [
+      {"LEMMA": {"IN": ["decir", "escribir", "dino", "dimir", "explicar", "dar"]}},
+      "text {"
+    ]
+  ]
+}
