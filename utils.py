@@ -27,6 +27,8 @@ AnyContext = Union[discord.Message, discord.ApplicationContext, discord.ext.comm
 
 lines_of_code = 0
 for _file in Path.cwd().rglob('*'):
+    if 'heroku' in str(_file) or 'vendor' in str(_file):
+        continue
     if _file.suffix == '.py':
         lines_of_code += len(_file.read_text().split('\n'))
     elif _file.suffix == '.part':
