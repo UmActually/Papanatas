@@ -149,6 +149,7 @@ class Events(commands.Cog):
                 brazil_channel = self.bot.get_channel(808355253141372990)
                 in_brazil = utils.in_brazil(member)
                 if in_brazil and (after.channel is not None) and after.channel.id != 808355253141372990:
+                    # noinspection PyTypeChecker
                     await member.move_to(brazil_channel)
                     await general_channel.send(f':x: Ni lo intentes {member.mention}', delete_after=2)
             except KeyError:

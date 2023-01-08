@@ -314,7 +314,7 @@ async def message_brazil(ctx, message: discord.Message):
 @bot.slash_command(guild_ids=Guilds.sociedad, name='brazil')
 @Checks.default
 async def manual_brazil(ctx, member: discord.Option(discord.Member)):
-    """Mandar manualmente a alguien a Brasil, por si estás en cel (raro)."""
+    """Mandar manualmente a alguien a Brasil."""
     await utils.send_to_brazil(ctx, member)
 
 
@@ -436,11 +436,24 @@ async def close(ctx):
 async def on_message(message: discord.Message):
     if message is None or message.type != discord.MessageType.default:
         return
-    if utils.in_brazil(message.author):
-        await message.delete()
-        await message.channel.send(':x: Estás en brasil', delete_after=2)
-        return
-    await bot.process_commands(message)
+    try:
+        if utils.in_brazil(message.author):
+            await message.delete()
+            await message.channel.send(':x: Estás en brasil', delete_after=2)
+            return
+        await bot.process_commands(message)
+    except AttributeError:
+        if message.guild is not None:
+            return
+
+        # Es un DM
+        try:
+            await message.author.send(
+                embed=utils.emb('No tengo manera de parsear mensajes directos '
+                                'en este momento. La tuya por si acaso.'))
+            await utils.debug_channel.send(f'DM de {message.author.mention}: {message.content}')
+        except discord.HTTPException:
+            pass
 
 
 @bot.event
@@ -453,14 +466,14 @@ async def on_command_error(ctx, error):
 # Tasks
 
 
-async def time_related_stuff():
+async def periodically_change_status():
     await bot.wait_until_ready()
     while not bot.is_closed():
         await bot.change_presence(activity=utils.random_activity())
         await asyncio.sleep(600)  # 10 minutos
 
 
-bot.loop.create_task(time_related_stuff())
+bot.loop.create_task(periodically_change_status())
 
 
 for file in os.listdir('Cogs'):

@@ -259,6 +259,7 @@ def is_worthy(message: discord.Message, ignore_myself=True) -> bool:
             message is None or
             message.type != discord.MessageType.default or
             ignore_myself and message.author.id == NATAS_ID or
+            message.guild is None or
             in_brazil(message.author)
     )
 
@@ -305,11 +306,21 @@ async def send_to_brazil(ctx: AnyContext, member: discord.Member, message: disco
 
 
 async def send_to_argentina(ctx: AnyContext):
+    async def send_no_users():
+        await ctx.respond(
+            embed=emb('No había gente en 🇧🇷. Todos se han estado portando bien.'))
+
     mentions = []
     try:
         brazil_ids = brazil[ctx.guild.id]
     except KeyError:
+        await send_no_users()
         return
+
+    if not brazil_ids:
+        await send_no_users()
+        return
+
     for member_id in brazil_ids:
         member = await ctx.guild.fetch_member(member_id)
         mentions.append(member.mention)
@@ -325,17 +336,13 @@ async def send_to_argentina(ctx: AnyContext):
             pass
     brazil[ctx.guild.id].clear()
 
-    if not mentions:
-        await ctx.respond(embed=emb('No había gente en 🇧🇷. Todos se han estado portando bien.'))
-        return
-
-    mention = ', '.join(mentions)
+    mentions = ', '.join(mentions)
     resps = [
-        f'Regresando de 🇧🇷 a {mention}.',
-        f'Levantando el castigo a {mention}.',
-        f'Regresando los derechos y la dignidad a {mention}.',
-        f'Terminando el sufrimiento para {mention}.',
-        f'Liberando a {mention} del purgatorio.',
+        f'Regresando de 🇧🇷 a {mentions}.',
+        f'Levantando el castigo a {mentions}.',
+        f'Regresando los derechos y la dignidad a {mentions}.',
+        f'Terminando el sufrimiento para {mentions}.',
+        f'Liberando a {mentions} del purgatorio.',
     ]
 
     await ctx.respond(embed=emb(choice(resps)))
