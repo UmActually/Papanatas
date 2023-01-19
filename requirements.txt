@@ -9,4 +9,4 @@ youtube_dl>=2021.12.17
 spacy>=3.2.1
 tabulate>=0.8.9
 Pillow>=9.0.0
-spotifyatlas
+spotifyatlas>=0.3.3

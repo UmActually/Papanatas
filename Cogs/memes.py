@@ -185,8 +185,10 @@ class Memes(commands.Cog):
 
     @staticmethod
     def meme_command(name: str) -> Callable:
+        """Factory de comandos. Me salva de escribir cinco funciones prácticamente iguales."""
         @commands.command(name=name)
         async def command(_self, ctx: commands.Context, *, text: str):
+            """Comando genérico para crear un meme con imágenes preexistentes."""
             meemify(caption=text, **eval(name))
             await ctx.send(file=discord.File('Resources/Memes/meem.jpg'))
             os.remove('Resources/Memes/meem.jpg')

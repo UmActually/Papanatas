@@ -19,6 +19,7 @@ from discord.ext import commands
 if TYPE_CHECKING:
     from vox import Vox
     from Juegos.uno import Uno
+    from Cogs.polls import Poll
     from spotifyatlas import SpotifyAPI
 
 
@@ -266,7 +267,11 @@ def is_worthy(message: discord.Message, ignore_myself=True) -> bool:
 
 def in_brazil(member: discord.Member):
     try:
-        return member.id in brazil[member.guild.id] \
+        guild_id = member.guild.id
+    except AttributeError:
+        return False
+    try:
+        return member.id in brazil[guild_id] \
                and member.id != 715394802752946199
     except KeyError:
         return False
@@ -400,51 +405,6 @@ class Emojis:
     @staticmethod
     def random_animated():
         return choice([Emojis.obama, Emojis.wahoo])
-
-
-class Poll:
-    """Clase para crear y llevar la cuenta en encuestas, hechas con el comando /poll."""
-
-    def __init__(self, title: str, options: str):
-        options = [o.strip(' ,;\n\t') for o in options.split(';')]
-        self.n_options = len(options)
-        self.title = title
-        self.options = options
-        self.msg = None
-        self.already_voted = []
-        self.votes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-    @property
-    def embed(self) -> discord.Embed:
-        desc = ''
-        for k, option in enumerate(self.options):
-            votes = self.votes[k]
-            winner = votes == max(self.votes)
-            if votes == 0:
-                desc += f'{Emojis.numbers[k]} | {option}\n'
-            else:
-                percent = int(100 * (votes / sum(self.votes)))
-                desc += f'{Emojis.numbers[k]} {winner * "**"}| {option} ({percent}%){winner * "**"}\n'
-        embed = discord.Embed(title=self.title.title(), description=desc)
-        embed.set_author(name='Encuesta', icon_url=image_url(884568260786389054, 'poll_icon'))
-        embed.set_footer(text='Provided by Papanatas.')
-        return embed
-
-    async def send_to(self, channel: AnyContext):
-        msg = await channel.send(embed=self.embed)
-        for i in range(self.n_options):
-            await msg.add_reaction(Emojis.numbers[i])
-        self.msg = msg
-        return self.msg.id
-
-    async def update(self, payload: discord.RawReactionActionEvent):
-        member = await self.msg.guild.fetch_member(payload.user_id)
-        if member.id in self.already_voted:
-            await self.msg.remove_reaction(payload.emoji, member)
-            return
-        self.already_voted.append(member.id)
-        self.votes[Emojis.numbers.index(str(payload.emoji))] += 1
-        await self.msg.edit(embed=self.embed)
 
 
 class Schedule:

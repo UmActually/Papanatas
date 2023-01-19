@@ -436,16 +436,13 @@ async def close(ctx):
 async def on_message(message: discord.Message):
     if message is None or message.type != discord.MessageType.default:
         return
-    try:
-        if utils.in_brazil(message.author):
-            await message.delete()
-            await message.channel.send(':x: Estás en brasil', delete_after=2)
-            return
+    if utils.in_brazil(message.author):
+        await message.delete()
+        await message.channel.send(':x: Estás en brasil', delete_after=2)
+        return
+    if message.guild is not None:
         await bot.process_commands(message)
-    except AttributeError:
-        if message.guild is not None:
-            return
-
+    else:
         # Es un DM
         try:
             await message.author.send(

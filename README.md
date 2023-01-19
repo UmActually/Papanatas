@@ -18,9 +18,13 @@ Papanatas es un **full-fledged music bot**. No estoy enterado del mundo de los b
 
 ![Ejemplo del player de música](https://cdn.discordapp.com/attachments/765560541309304862/1060354393783931040/example.jpg)    
 
-Con este comando es posible tanto realizar búsquedas como pasar directamente el enlace de **YouTube** o **[Spotify](https://github.com/UmActually/spotifyatlas)**. Si está una canción sonando ya, el uso de `/p` solamente agregará canciones a la cola. Asimismo, si se pasa como query un enlace de **Spotify** se agregará a la cola una selección de **10 pistas** al azar como máximo, en el caso de ser una playlist, un álbum o un artista.    
+Con este comando es posible tanto realizar búsquedas como pasar directamente el enlace de **[YouTube](https://github.com/ytdl-org/youtube-dl)** o **[Spotify](https://github.com/UmActually/spotifyatlas)**. Si está una canción sonando ya, el uso de `/p` solamente agregará canciones a la cola. Asimismo, si se pasa como query un enlace de **Spotify** se agregará a la cola una selección de **10 pistas** al azar como máximo, en el caso de ser una playlist, un álbum o un artista.
 
-Para realizar búsquedas específicas, también se puede usar `/ly` y `/ost`, que agregan `" lyrics"` y `" ost"` respectivamente a tu búsqueda. Por ejemplo, si bien `/p otherside` pone la de **Red Hot Chili Peppers**, `/ost otherside` va a regresar la de **Lena Raine**. También, estos comandos pueden **reemplazar** la canción que esté sonando si no escribes nada para buscar. Así, en el momento en que te salga un Official Video donde nomás no quiere empezar la música, puedes mandar `/ly` y la canción se volverá a buscar con el sufijo `" lyrics"`.    
+Recientemente agregué los comandos `/playlist`, `/album` y `/artist`. Estos comandos hacen una **búsqueda en Spotify** y agregan a la cola las canciones del top result que arroje. Igual que al usar `/p` con el link de un artista, el comando `/artist` pone las **diez canciones top**. 
+
+![Ejemplo de búsqueda de artista](https://cdn.discordapp.com/attachments/765560541309304862/1065470313778909195/example.jpg)
+
+Para búsquedas específicas en **YouTube**, también se puede usar `/ly` y `/ost`, que agregan `" lyrics"` y `" ost"` respectivamente a tu búsqueda. Por ejemplo, si bien `/p otherside` pone la de **Red Hot Chili Peppers**, `/ost otherside` va a regresar la de **Lena Raine**. También, estos comandos pueden **reemplazar** la canción que esté sonando si no escribes nada para buscar. Así, en el momento en que te salga un Official Video donde nomás no quiere empezar la música, puedes mandar `/ly` y la canción se volverá a buscar con el sufijo `" lyrics"`.
 
 Para **alterar la cola** de canciones están también los comandos `/skip`, `/shuffle`, y `/clear`.    
 
@@ -66,43 +70,45 @@ Papanatas también puede **agregar texto a imágenes** usando [Pillow](https://p
 
 ### Todos los comandos  
 
-| Comando                                               | Descripción                                                                                                                            |
-|-------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| `/info`                                               | Información de Papanatas.                                                                                                              |
-| `/time`                                               | Fecha y hora en México.                                                                                                                |
-| `/natas`                                              | Información y ejemplos de 'natas Natural Language.                                                                                     |
-| `/dl [link_or_search]`                                | Descargar un video DE DURACIÓN RAZONABLE con YouTube DL.                                                                               |
-| `/act [type?] [name?] [status?]`                      | Cambiar el status del perfil de Papanatas.                                                                                             |
-| `/nk [member] [nick]`                                 | Cambiar el nick de cualquier usuario.                                                                                                  |
-| `/hr`                                                 | Horario de clases de prepa. Este comando obviamente ya no nos sirve. Solo está aquí por nostalgia.                                     |
-| `/coords [xyz]`                                       | Traduce coordenadas de minecraft de Overworld a Nether.                                                                                |
-| `/uno`                                                | Iniciar nuevo juego de UNO.                                                                                                            |
-| `/chess`                                              | Iniciar nuevo juego de ajedrez.                                                                                                        |
-| `/echo [text]`                                        | Enviar un mensaje en este canal.                                                                                                       |
-| `/tell [channel] [text]`                              | Enviar un mensaje a otro canal.                                                                                                        |
-| `/reply [message_id] [text] [channel?]`               | Responder a un mensaje.                                                                                                                |
-| `/edit [message_id] [text] [channel?]`                | Editar un mensaje de Papanatas.                                                                                                        |
-| `/salt [seconds] [text]`                              | Enviar un mensaje que se autodestruirá en la cantidad de segundos especificada.                                                        |
-| `/brazil [member]`                                    | Mandar a alguien a Brasil.                                                                                                             |
-| `/argentina`                                          | Sacar a todos de Brasil.                                                                                                               |
-| `/jn`                                                 | Unirse al voice.                                                                                                                       |
-| `/lv`                                                 | Salirse del voice.                                                                                                                     |
-| `/p [query]`                                          | Agregar una canción a la fila.                                                                                                         |
-| `/skip`                                               | Siguiente canción en la fila.                                                                                                          |
-| `/undo`                                               | Quitar la última canción de la fila (que tú hayas agregado).                                                                           |
-| `/clear`                                              | Borrar todas las rolas de la fila.                                                                                                     |
-| `/shuffle`                                            | Shufflear la fila.                                                                                                                     |
-| `/playlist [link_or_name]`                            | Agregar una playlist a la fila, guardada en el canal de \#playlists. Para agregar una playlist con el link también se puede usar `/p`. |
-| `/ly [query?]`                                        | Poner una canción agregando "lyrics" en la búsqueda. Si no se teclea búsqueda, reemplazar lo que está sonando agregándole "lyrics".    |
-| `/ost [query?]`                                       | Mismo funcionamiento que `/ly`, pero agregando "ost".                                                                                  |
-| `/soundboard`                                         | Mostrar todos los efectos del soundboard.                                                                                              |
-| `/poll [title] [options]`                             | Crear nueva encuesta. Separa las opciones con ";"                                                                                      |
-| `/meme [text] [position?] [color?] [font?] [stroke?]` | Crear un meme con la imagen más reciente del canal. Si la posición es "top & bottom", separar el texto de arriba y abajo con ";".      |
-| `/skipper [text]`                                     | Meme de "Goku le gana".                                                                                                                |
-| `/able [text]`                                        | Meme de la bola amarilla ansiosa.                                                                                                      |
-| `/yoda [text]`                                        | Meme de "Mucho texto".                                                                                                                 |
-| `/jimmy [text]`                                       | Meme de Jimmy Neutrón explicándote algo.                                                                                               |
-| `/chtm [text]`                                        | Meme de la bola amarilla sacando el dedo.                                                                                              |
+| Comando                                               | Descripción                                                                                                                         |
+|-------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| `/info`                                               | Información de Papanatas.                                                                                                           |
+| `/time`                                               | Fecha y hora en México.                                                                                                             |
+| `/natas`                                              | Información y ejemplos de 'natas Natural Language.                                                                                  |
+| `/dl [link_or_search]`                                | Descargar un video DE DURACIÓN RAZONABLE con YouTube DL.                                                                            |
+| `/act [type?] [name?] [status?]`                      | Cambiar el status del perfil de Papanatas.                                                                                          |
+| `/nk [member] [nick]`                                 | Cambiar el nick de cualquier usuario.                                                                                               |
+| `/hr`                                                 | Horario de clases de prepa. Este comando obviamente ya no nos sirve. Solo está aquí por nostalgia.                                  |
+| `/coords [xyz]`                                       | Traduce coordenadas de minecraft de Overworld a Nether.                                                                             |
+| `/uno`                                                | Iniciar nuevo juego de UNO.                                                                                                         |
+| `/chess`                                              | Iniciar nuevo juego de ajedrez.                                                                                                     |
+| `/echo [text]`                                        | Enviar un mensaje en este canal.                                                                                                    |
+| `/tell [channel] [text]`                              | Enviar un mensaje a otro canal.                                                                                                     |
+| `/reply [message_id] [text] [channel?]`               | Responder a un mensaje.                                                                                                             |
+| `/edit [message_id] [text] [channel?]`                | Editar un mensaje de Papanatas.                                                                                                     |
+| `/salt [seconds] [text]`                              | Enviar un mensaje que se autodestruirá en la cantidad de segundos especificada.                                                     |
+| `/brazil [member]`                                    | Mandar a alguien a Brasil.                                                                                                          |
+| `/argentina`                                          | Sacar a todos de Brasil.                                                                                                            |
+| `/jn`                                                 | Unirse al voice.                                                                                                                    |
+| `/lv`                                                 | Salirse del voice.                                                                                                                  |
+| `/p [query]`                                          | Agregar una canción a la fila.                                                                                                      |
+| `/skip`                                               | Siguiente canción en la fila.                                                                                                       |
+| `/undo`                                               | Quitar la última canción de la fila (que tú hayas agregado).                                                                        |
+| `/clear`                                              | Borrar todas las rolas de la fila.                                                                                                  |
+| `/shuffle`                                            | Shufflear la fila.                                                                                                                  |
+| `/playlist [query]`                                   | Agregar una playlist a la fila, guardada en el canal de \#playlists. En caso de no haber match, realiza una búsqueda en Spotify.    |
+| `/album [query]`                                      | Buscar un álbum en Spotify y agregar a la cola las canciones del top result.                                                        |
+| `/artist [query]`                                     | Buscar un artista en Spotify y agregar a la cola las (top 10) canciones del top result.                                             |
+| `/ly [query?]`                                        | Poner una canción agregando "lyrics" en la búsqueda. Si no se teclea búsqueda, reemplazar lo que está sonando agregándole "lyrics". |
+| `/ost [query?]`                                       | Mismo funcionamiento que `/ly`, pero agregando "ost".                                                                               |
+| `/soundboard`                                         | Mostrar todos los efectos del soundboard.                                                                                           |
+| `/poll [title] [options]`                             | Crear nueva encuesta. Separa las opciones con ";"                                                                                   |
+| `/meme [text] [position?] [color?] [font?] [stroke?]` | Crear un meme con la imagen más reciente del canal. Si la posición es "top & bottom", separar el texto de arriba y abajo con ";".   |
+| `/skipper [text]`                                     | Meme de "Goku le gana".                                                                                                             |
+| `/able [text]`                                        | Meme de la bola amarilla ansiosa.                                                                                                   |
+| `/yoda [text]`                                        | Meme de "Mucho texto".                                                                                                              |
+| `/jimmy [text]`                                       | Meme de Jimmy Neutrón explicándote algo.                                                                                            |
+| `/chtm [text]`                                        | Meme de la bola amarilla sacando el dedo.                                                                                           |
 
 ### Para jugar UNO    
 

@@ -1,9 +1,10 @@
+import itertools
 from random import sample
-from typing import Optional, List
+from typing import Optional, Callable
 
 import discord
+import spotifyatlas
 from discord.ext import commands
-from spotifyatlas import Track
 
 import nlp
 import utils
@@ -13,6 +14,7 @@ from vox import Vox
 
 ROAST_INNOCENT_USER = utils.emb('Tú no estás en ningún canal de voz y yo no estoy hecho para adivinar a cuál unirme.')
 ROAST_EDGY_USER = utils.emb('No estás en ningún canal de voz. Me reservo el derecho de no hacer nada por ti.')
+PLAYLIST_CHANNELS = utils.file('Resources/playlist_channels.json')
 
 
 async def special_search(ctx: AnyContext, query: str, keyword: str):
@@ -38,24 +40,31 @@ async def special_search(ctx: AnyContext, query: str, keyword: str):
         await vox.undo(ctx, keyword)
 
 
-async def queue_list(ctx: AnyContext, tracks: List[Track], sample_size=10):
-    length = len(tracks)
-    tracks = list(map(lambda t: f'{t.name} {t.artist} lyrics',
-                      sample(tracks, min(length, sample_size))))
+async def queue_spotify_result(ctx: AnyContext, result: spotifyatlas.Result):
+    length = len(result.tracks)
+
+    if isinstance(result.tracks[0], str):
+        tracks = result.tracks
+        first_track = tracks.pop(0)
+    else:
+        tracks = map(lambda t: f'{t.name} {t.artist} lyrics',
+                     sample(result.tracks, min(length, 10)))
+        first_track = next(tracks)
 
     vox = Vox.get(ctx.guild.id)
     if length == 1:
-        await vox.add_to_queue(ctx, tracks[0], 'lyrics')
+        await vox.add_to_queue(ctx, first_track, 'lyrics')
         return
 
     task = None
 
     # La primera rola la agrega siempre
-    await vox.add_to_queue(ctx, tracks[0], 'lyrics', will_queue_list=True)
+    await vox.add_to_queue(ctx, first_track, 'lyrics', will_queue_list=True)
 
     # Las otras rolas se las prometemos al usuario. Viva el async™
     # DE DOS EN DOS PORQUE HEROKU LLORA
-    for i, track in enumerate(tracks[1:]):
+    for i, track in enumerate(tracks):
+        # noinspection PyTypeChecker
         task = utils.event_loop.create_task(vox.add_to_queue(ctx, track, 'lyrics'))
         if i % 2:
             await task
@@ -67,9 +76,11 @@ async def queue_list(ctx: AnyContext, tracks: List[Track], sample_size=10):
     await vox.update_embed(ctx)
 
 
-def spotify_embed(result) -> discord.Embed:
-    embed = discord.Embed(title=result.name, description=result.author_or_artist)
-    embed.set_thumbnail(url=result.image_url)
+def spotify_embed(result: spotifyatlas.Result) -> discord.Embed:
+    desc = 'Top Tracks' if result.type == spotifyatlas.Type.ARTIST else result.author_or_artist
+    embed = discord.Embed(title=result.name, description=desc)
+    if result.image_url is not None:
+        embed.set_thumbnail(url=result.image_url)
     return embed
 
 
@@ -77,15 +88,69 @@ class VoxCommands(commands.Cog):
     def __init__(self, client):
         self.bot = client
 
-    async def search_playlist(self, channel_id: int, name: str) -> Optional[List[str]]:
-        channel: discord.TextChannel = self.bot.get_channel(channel_id)
-        async for msg in channel.history():
-            if msg.author.bot:
-                continue
-            tracks = msg.content.split('\n')
-            curr_name = utils.acentoless(tracks.pop(0))
-            if curr_name == name:
-                return tracks
+    @staticmethod
+    def spotify_command(name: str) -> Callable:
+        """Factory de los comandos /playlist, /album y /artist"""
+        is_playlist = name == 'playlist'
+
+        @commands.command(name=name)
+        async def command(self, ctx: commands.Context, *, query: str):
+            """Para buscar contenido específico en spotify, y reproducir el top result.
+
+            En el caso de /playlist, hay un chequeo especial para ver si una playlist
+            está guardada como alias (o tiene ahí mismo las canciones) en los canales
+            de playlists de los servers."""
+
+            msg = await ctx.send(embed=utils.emb(
+                f'Buscando en {"playlists guardadas" if is_playlist else "spoti"}...'))
+
+            result = None
+            if query.startswith('https://open.spotify.com/'):
+                result = utils.spoti.get(query)
+            elif is_playlist:
+                result = await self.search_playlist_aliases(query, ctx.guild.id)
+
+            if result is None:
+                if is_playlist:
+                    await msg.edit(embed=utils.emb('Buscando en spoti...'))
+                result = utils.spoti.im_feeling_lucky(
+                    query, eval(f'spotifyatlas.Type.{name.upper()}'))
+
+            if result is not None:
+                await msg.edit(embed=spotify_embed(result))
+                await queue_spotify_result(ctx, result)
+            else:
+                await msg.edit(embed=utils.emb(
+                    f'No encontré ningún resultado. Escribe bien, atte., Papanatas.'))
+
+        return command
+
+    async def search_playlist_aliases(self, target: str, guild_id: int) -> Optional[spotifyatlas.Result]:
+        target = utils.acentoless(target)
+
+        for channel_id in itertools.chain(
+                (PLAYLIST_CHANNELS[str(guild_id)], ), PLAYLIST_CHANNELS.values()):
+            channel: discord.TextChannel = self.bot.get_channel(channel_id)
+
+            async for msg in channel.history():
+                if msg.author.bot:
+                    continue
+                tracks = msg.content.split('\n')
+                header = tracks.pop(0)
+                less = utils.acentoless(header)
+
+                if less == target:
+                    if tracks[0].startswith('https://open.spotify.com/'):
+                        return utils.spoti.get(tracks[0])
+
+                    # noinspection PyTypeChecker
+                    return spotifyatlas.Result(
+                        None, spotifyatlas.Type.PLAYLIST, header,
+                        msg.author.display_name, tracks)
+
+    playlist = spotify_command('playlist')
+    album = spotify_command('album')
+    artist = spotify_command('artist')
 
     @commands.slash_command(guild_ids=Guilds.all, name='jn')
     @nlp.listens('jn', inside=Cog.vox_commands)
@@ -118,7 +183,7 @@ class VoxCommands(commands.Cog):
                 await ctx.send(embed=utils.emb('La URL no jala. Escribe bien, atte, Papanatas.'))
                 return
             await ctx.send(embed=spotify_embed(result))
-            await queue_list(ctx, result.tracks)
+            await queue_spotify_result(ctx, result)
             return
         vox = Vox.get(ctx.guild.id)
         await vox.add_to_queue(ctx, query)
@@ -168,69 +233,6 @@ class VoxCommands(commands.Cog):
         vox = Vox.get(ctx.guild.id)
         await vox.shuffle_queue(ctx)
         await ctx.respond(embed=utils.emb('Shuffleado.', Emojis.wild), delete_after=5)
-
-    @commands.slash_command(guild_ids=Guilds.all)
-    async def playlist(self, ctx: discord.ApplicationContext, link_or_name: discord.Option(str)):
-        """Agregar una playlist a la fila, del canal #playlists."""
-        if ctx.author.voice is None:
-            await ctx.respond(embed=ROAST_EDGY_USER, ephemeral=True)
-            return
-
-        query = link_or_name
-        sample_size = 10
-
-        # Por default toma 10 canciones al azar, salvo que haya un número al final de query
-        if ' ' in query and query[-1].isdigit():
-            split = query.split(' ')
-            try:
-                sample_size = int(split[-1])
-                query = ' '.join(split[:-1])
-            except ValueError:
-                pass
-
-        # Si pasa el link
-        if query.startswith('https://open.spotify.com/'):
-            resp: discord.Interaction = await ctx.respond(embed=utils.emb(f'Buscando en spoti...'))
-            result = utils.spoti.get(query)
-            if result is None:
-                await resp.edit_original_message(embed=utils.emb(f'La URL no jala. Escribe bien, atte, Papanatas.'))
-                return
-            await resp.edit_original_message(embed=spotify_embed(result))
-            tracks = result.tracks
-
-        # Si pasa un nombre
-        else:
-            resp: discord.Interaction = await ctx.respond(embed=utils.emb(f'Buscando la playlist **"{query}"**.'))
-            query = utils.acentoless(query)
-
-            # Buscar la playlist, priorizando el canal del server
-            playlist_channels: dict = utils.file('Resources/playlist_channels.json')
-            try:
-                channel_id = playlist_channels[str(ctx.guild.id)]
-                tracks = await self.search_playlist(channel_id, query)
-            except KeyError:
-                tracks = None
-
-            if tracks is None:
-                for channel_id in playlist_channels.values():
-                    tracks = await self.search_playlist(channel_id, query)
-                    if tracks is not None:
-                        break
-                else:
-                    await resp.edit_original_message(embed=utils.emb(f'No existe la playlist **"{query}"**.'))
-                    return
-            
-            # Si el nombre es un alias para un link
-            if tracks[0].startswith('https://open.spotify.com/'):
-                result = utils.spoti.get(tracks[0])
-                if result is None:
-                    await resp.edit_original_message(embed=utils.emb(f'La URL no jala. Escribe bien, atte, Papanatas.'))
-                    return
-                await resp.edit_original_message(embed=spotify_embed(result))
-                tracks = result.tracks
-
-        # Agregar las rolas de una por una
-        await queue_list(ctx, tracks, sample_size)
 
     @commands.command(aliases=['ly'])
     async def lyrics(self, ctx: commands.Context, *, query=''):
