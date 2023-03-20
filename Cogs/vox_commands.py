@@ -1,6 +1,6 @@
 import itertools
 from random import sample
-from typing import Optional, Callable
+from typing import Optional, Union, Callable
 
 import discord
 import spotifyatlas
@@ -15,6 +15,7 @@ from vox import Vox
 ROAST_INNOCENT_USER = utils.emb('Tú no estás en ningún canal de voz y yo no estoy hecho para adivinar a cuál unirme.')
 ROAST_EDGY_USER = utils.emb('No estás en ningún canal de voz. Me reservo el derecho de no hacer nada por ti.')
 PLAYLIST_CHANNELS = utils.file('Resources/playlist_channels.json')
+Result = Union[spotifyatlas.Playlist, spotifyatlas.Artist, spotifyatlas.Album, spotifyatlas.Track]
 
 
 async def special_search(ctx: AnyContext, query: str, keyword: str):
@@ -40,15 +41,25 @@ async def special_search(ctx: AnyContext, query: str, keyword: str):
         await vox.undo(ctx, keyword)
 
 
-async def queue_spotify_result(ctx: AnyContext, result: spotifyatlas.Result):
-    length = len(result.tracks)
+async def queue_spotify_result(ctx: AnyContext, result: Result):
+    try:
+        # Album / Playlist
+        tracks = result.tracks
+    except AttributeError:
+        try:
+            # Artist
+            tracks = result.top_tracks
+        except AttributeError:
+            # Track
+            tracks = [result]
+    length = len(tracks)
 
-    if isinstance(result.tracks[0], str):
+    if isinstance(tracks[0], str):
         tracks = result.tracks
         first_track = tracks.pop(0)
     else:
-        tracks = map(lambda t: f'{t.name} {t.artist} lyrics',
-                     sample(result.tracks, min(length, 10)))
+        tracks = map(lambda t: f'{t.name} {t.artist.name} lyrics',
+                     sample(tracks, min(length, 10)))
         first_track = next(tracks)
 
     vox = Vox.get(ctx.guild.id)
@@ -76,11 +87,25 @@ async def queue_spotify_result(ctx: AnyContext, result: spotifyatlas.Result):
     await vox.update_embed(ctx)
 
 
-def spotify_embed(result: spotifyatlas.Result) -> discord.Embed:
-    desc = 'Top Tracks' if result.type == spotifyatlas.Type.ARTIST else result.author_or_artist
+def spotify_embed(result: Result) -> discord.Embed:
+    try:
+        # Album / Track
+        desc = result.artist.name
+    except AttributeError:
+        try:
+            # Playlist
+            desc = result.owner.name
+        except AttributeError:
+            # Artist
+            desc = 'Top Tracks'
+    try:
+        image_url = result.image_url
+    except AttributeError:
+        # Track
+        image_url = result.album.image_url
     embed = discord.Embed(title=result.name, description=desc)
     if result.image_url is not None:
-        embed.set_thumbnail(url=result.image_url)
+        embed.set_thumbnail(url=image_url)
     return embed
 
 
@@ -114,7 +139,7 @@ class VoxCommands(commands.Cog):
                 if is_playlist:
                     await msg.edit(embed=utils.emb('Buscando en spoti...'))
                 result = utils.spoti.im_feeling_lucky(
-                    query, eval(f'spotifyatlas.Type.{name.upper()}'))
+                    query, eval(f'spotifyatlas.ResultType.{name.upper()}'))
 
             if result is not None:
                 await msg.edit(embed=spotify_embed(result))
@@ -125,7 +150,7 @@ class VoxCommands(commands.Cog):
 
         return command
 
-    async def search_playlist_aliases(self, target: str, guild_id: int) -> Optional[spotifyatlas.Result]:
+    async def search_playlist_aliases(self, target: str, guild_id: int) -> Optional[spotifyatlas.Playlist]:
         target = utils.acentoless(target)
 
         for channel_id in itertools.chain(
@@ -144,9 +169,9 @@ class VoxCommands(commands.Cog):
                         return utils.spoti.get(tracks[0])
 
                     # noinspection PyTypeChecker
-                    return spotifyatlas.Result(
-                        None, spotifyatlas.Type.PLAYLIST, header,
-                        msg.author.display_name, tracks)
+                    return spotifyatlas.Playlist(
+                        None, header, spotifyatlas.User(None, msg.author.display_name),
+                        tracks=tracks)
 
     playlist = spotify_command('playlist')
     album = spotify_command('album')

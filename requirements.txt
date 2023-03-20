@@ -1,3 +1,4 @@
+git+https://github.com/ytdl-org/youtube-dl.git@master#egg=youtube_dl
 py-cord>=2.3.2
 dnspython>=1.16.0
 PyNaCl>=1.4.0
@@ -5,7 +6,6 @@ async-timeout>=4.0.0
 datetime
 pytz>=2020.1
 requests>=2.25.1
-youtube_dl>=2021.12.17
 spacy>=3.2.1
 tabulate>=0.8.9
 Pillow>=9.0.0
