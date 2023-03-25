@@ -1,5 +1,5 @@
 git+https://github.com/ytdl-org/youtube-dl.git@master#egg=youtube_dl
-py-cord>=2.3.2
+py-cord>=2.4.1
 dnspython>=1.16.0
 PyNaCl>=1.4.0
 async-timeout>=4.0.0
