@@ -359,8 +359,9 @@ class Guilds:
     itc = [871860282840997888]
     coro = [865988914723815454]
     ell = [790338348048187413]
+    cyber = [1088972610156638238]
     maria = sociedad + gsquad
-    all = sociedad + gsquad + itc + coro + ell
+    all = sociedad + gsquad + itc + coro + ell + cyber
     uno = list(map(int, file('Resources/Juegos/uno_channels.json').keys()))
 
 
